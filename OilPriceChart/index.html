@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Brent Crude Price Chart for the past Year</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+</head>
+<body>
+
+        <canvas id="chart" width="400" height="200"></canvas>
+
+        <script>
+
+        // Making the Chart js function    
+        async function chartIt() {
+            //Waiting for the get data function to parse first
+            const data = await getData();
+            const ctx = document.getElementById('chart').getContext('2d');
+            const myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    //getting x-axis labels from the getData function.
+                    labels: data.xs,
+                    datasets: [
+                    {
+                        label: 'Brent Crude Price',
+                        //getting y-axis data from the getData function.
+                        data: data.ys,
+                        fill: false,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }
+                ]
+                },
+                //add degree symbol to the y-axis
+                options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            callback: function(value, index, values) {                                            
+                                return "$" + value; 
+                            }
+                        }
+                    }]
+                }
+            }
+            });
+        }
+
+        chartIt()
+        
+        
+
+        //fetch data from csv file
+        async function getData() {
+
+            const xs = [];
+            const ys = [];
+
+            const response = await fetch('brent-daily_csv.csv');
+            const data = await response.text();
+            const table = data.split('\n').slice(1)
+            table.forEach(row => {
+                const col = row.split(',');
+                const date = col[0];
+                xs.push(date)
+                const price = col[1];
+                ys.push(price)
+                // console.log(date, price)
+            })
+
+            return { xs, ys }
+            }
+        getData()
+        
+        </script>
+    
+</body>
+</html>
